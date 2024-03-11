@@ -71,5 +71,11 @@
       (game (insere-valor-casa tabuleiro linha-j casa-j "X") (inc rodada))
       )))
 
+(defn game [tabuleiro rodada jogador]
+  (imprimir-tabuleiro tabuleiro rodada)
+  (if (= jogador 1)
+    (play-jogador-1 tabuleiro rodada)
+    (play-jogador-2 tabuleiro rodada))
+  )
 
 (game tabuleiro-exemplo2 0 1)
