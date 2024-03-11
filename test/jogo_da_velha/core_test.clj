@@ -1,6 +1,6 @@
 (ns jogo-da-velha.core-test
   (:require [clojure.test :refer :all]
-            [jogo-da-velha.core :refer :all]))
+            [jogo-da-velha.game :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
