@@ -27,12 +27,17 @@
 (defn verificar-todas-linhas-preenchidas [linhas]
   (every? #(not= "." %) (apply concat linhas)))
 
+(defn linha-vitoriosa? [linha]
+  (and (not= "." (first linha)) (apply = linha)))
+
 (defn verificar-vencedor [tabuleiro]
   (let [linhas tabuleiro
         colunas (apply map vector tabuleiro)
-        diagonais [(map nth tabuleiro [0 1 2]) (map nth tabuleiro [2 1 0])]
-        todas-secoes (concat linhas colunas diagonais)]
-    (some #(every? (partial = %) %) todas-secoes)))
+        diagonais [[(nth (first tabuleiro) 0) (nth (second tabuleiro) 1) (nth (last tabuleiro) 2)]
+                   [(nth (first tabuleiro) 2) (nth (second tabuleiro) 1) (nth (last tabuleiro) 0)]]]
+    (or (some linha-vitoriosa? linhas)
+        (some linha-vitoriosa? colunas)
+        (some linha-vitoriosa? diagonais))))
 
 (defn mensagem_vitoria
   [jogador]
