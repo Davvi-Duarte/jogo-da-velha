@@ -1,10 +1,6 @@
 (ns jogo-da-velha.game)
 
-(def tabuleiro-exemplo
-  [["1" "2" "3"]
-   ["4" "5" "6"]
-   ["7" "8" "9"]])
-
+;Autor: Davvi Duarte Rodrigues
 
 (defn insere-valor-casa
   "funcao para testar a iteracao dentro de matrizes"
@@ -22,60 +18,50 @@
       (print " "))
     (println)))
 
-(defn todos-iguais? [vetor]
-  (if (some #(= "." %) vetor)
+(defn verifica_casa_disponivel
+  [tabuleiro linha casa]
+  (if (not (= "." (nth (nth tabuleiro (dec linha)) (dec casa))))
     false
-    (apply = vetor))
-  )
+    true))
 
-
-(defn verifica-elementos-iguais? [conj]
-  (loop [pos 0]
-    (cond
-      (todos-iguais? (nth conj pos)) true
-      (and (= pos (dec (count conj))) (not (todos-iguais? (nth conj pos)))) false
-      :else (recur (inc pos)))))
-
-(def tabuleiro-exemplo2
-  [["." "." "."]
-   ["." "." "."]
-   ["." "." "."]])
-
-
+(defn verificar-todas-linhas-preenchidas [linhas]
+  (every? #(not= "." %) (apply concat linhas)))
 
 (defn verificar-vencedor [tabuleiro]
   (let [linhas tabuleiro
         colunas (apply map vector tabuleiro)
-        diagonais [(map nth tabuleiro [0 1 2]) (map nth tabuleiro [2 1 0])]]
-    (or (verifica-elementos-iguais? linhas) (verifica-elementos-iguais? colunas) (verifica-elementos-iguais? diagonais))
-    )
-  )
-(println (verificar-vencedor tabuleiro-exemplo2))
+        diagonais [(map nth tabuleiro [0 1 2]) (map nth tabuleiro [2 1 0])]
+        todas-secoes (concat linhas colunas diagonais)]
+    (some #(every? (partial = %) %) todas-secoes)))
 
-(defn play-jogador-2
-  [tabuleiro rodada]
-  (imprimir-tabuleiro tabuleiro rodada)
-  (println "Jogador 2 escolha a linha que irá realizar a jogada: ")
-  (let [linha-j (read)]
-    (println "Jogador 2 escolha a casa que irá realizar a jogada: ")
-    (let [casa-j (read)]
-      (game (insere-valor-casa tabuleiro linha-j casa-j "X") (inc rodada))
-      )))
-(defn play-jogador-1
-  [tabuleiro rodada]
-  (imprimir-tabuleiro tabuleiro rodada)
-  (println "Jogador 1 escolha a linha que irá realizar a jogada: ")
-  (let [linha-j (read)]
-    (println "Jogador 1 escolha a casa que irá realizar a jogada: ")
-    (let [casa-j (read)]
-      (game (insere-valor-casa tabuleiro linha-j casa-j "X") (inc rodada))
-      )))
+(defn mensagem_vitoria
+  [jogador]
+  (if (= jogador "Jogador 1")
+    (println "JOGADOR 2 VENCEU!")
+    (println "JOGADOR 1 VENCEU!")))
 
 (defn game [tabuleiro rodada jogador]
   (imprimir-tabuleiro tabuleiro rodada)
-  (if (= jogador 1)
-    (play-jogador-1 tabuleiro rodada)
-    (play-jogador-2 tabuleiro rodada))
-  )
+  (cond
+    (and (verificar-todas-linhas-preenchidas tabuleiro) (not (verificar-vencedor tabuleiro))) (println "EMPATE")
+    :else (do (if (verificar-vencedor tabuleiro)
+                (mensagem_vitoria jogador)
+                (do (println jogador " escolha a linha que irá realizar a jogada: ")
+                    (let [linha-j (read)]
+                      (println jogador " escolha a casa que irá realizar a jogada: ")
+                      (let [casa-j (read)]
+                        (if (or (> linha-j 3) (> casa-j 3) (< linha-j 1) (< casa-j 1))
+                          (do (println "Jogada inválida, tente novamente!")
+                              (game tabuleiro rodada jogador))
+                          (if (verifica_casa_disponivel tabuleiro linha-j casa-j)
+                            (do (if (= jogador "Jogador 1")
+                                  (game (insere-valor-casa tabuleiro linha-j casa-j "X") (inc rodada) "Jogador 2")
+                                  (game (insere-valor-casa tabuleiro linha-j casa-j "O") (inc rodada) "Jogador 1")))
+                            (do (println "Jogada inválida, tente novamente!")
+                                (game tabuleiro rodada jogador)))))))))))
 
-(game tabuleiro-exemplo2 0 1)
+(def tabuleiro
+  [["." "." "."]
+   ["." "." "."]
+   ["." "." "."]])
+(game tabuleiro 1 "Jogador 1")
